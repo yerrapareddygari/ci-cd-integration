@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo App</title>
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: 40px auto; }
+    form { display: flex; gap: 8px; }
+    input[type="text"] { flex: 1; padding: 6px; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+    li span { flex: 1; }
+    li.done span { text-decoration: line-through; color: #888; }
+  </style>
+</head>
+<body>
+  <h1>Todo App</h1>
+  <form id="form">
+    <input type="text" id="title" placeholder="New todo" required />
+    <button type="submit">Add</button>
+  </form>
+  <ul id="list"></ul>
+
+  <script>
+    const API = "http://localhost:8000";
+    const list = document.getElementById("list");
+
+    async function load() {
+      const res = await fetch(`${API}/todos`);
+      const todos = await res.json();
+      list.innerHTML = "";
+      for (const t of todos) {
+        const li = document.createElement("li");
+        if (t.completed) li.className = "done";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = t.completed;
+        cb.onchange = async () => {
+          await fetch(`${API}/todos/${t.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ completed: cb.checked }),
+          });
+          load();
+        };
+
+        const span = document.createElement("span");
+        span.textContent = t.title;
+
+        const del = document.createElement("button");
+        del.textContent = "Delete";
+        del.onclick = async () => {
+          await fetch(`${API}/todos/${t.id}`, { method: "DELETE" });
+          load();
+        };
+
+        li.append(cb, span, del);
+        list.appendChild(li);
+      }
+    }
+
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("title");
+      await fetch(`${API}/todos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: input.value }),
+      });
+      input.value = "";
+      load();
+    });
+
+    load();
+  </script>
+</body>
+</html>
