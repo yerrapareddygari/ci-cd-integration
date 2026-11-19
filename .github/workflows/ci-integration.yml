@@ -1,0 +1,15 @@
+name: Testing CI Integration
+on:
+  push:
+    branches: [main]
+jobs:
+  Hello-world:
+   runs-on: ubuntu-latest
+   steps:
+    - name: Checkout the latest code
+      uses: actions/checkout@v4
+    - name: List the files
+      runs: |
+            echo " Listing the files from project"
+            ls -la
+
