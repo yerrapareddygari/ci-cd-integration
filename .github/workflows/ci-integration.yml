@@ -9,7 +9,7 @@ jobs:
     - name: Checkout the latest code
       uses: actions/checkout@v4
     - name: List the files
-      runs: |
+      run: |
             echo " Listing the files from project"
             ls -la
 
